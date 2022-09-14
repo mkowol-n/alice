@@ -200,6 +200,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  open_file:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: d61a6d9
+      resolved-ref: d61a6d901183cc1966eab9b611b8916ee37ff400
+      url: "https://github.com/mkowol-n/open_file"
+    source: git
+    version: "3.2.2"
   package_info_plus:
     dependency: "direct main"
     description:
