@@ -18,7 +18,7 @@ dependencies:
 
   path_provider: ^2.0.15
   permission_handler: ^10.2.0
-  package_info_plus: ^4.0.2
+  package_info_plus: ^8.0.0
   sensors_plus: ^3.0.2
   share_plus: ^7.0.2
   chopper: ^6.1.4
