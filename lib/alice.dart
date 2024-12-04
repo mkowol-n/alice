@@ -112,7 +112,7 @@ class Alice {
   }
 
   /// Get chopper interceptor. This should be added to Chopper instance.
-  List<ResponseInterceptor> getChopperInterceptor() {
+  List<Interceptor> getChopperInterceptor() {
     return [AliceChopperInterceptor(_aliceCore)];
   }
 

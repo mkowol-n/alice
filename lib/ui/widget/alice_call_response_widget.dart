@@ -2,7 +2,6 @@ import 'package:alice/model/alice_http_call.dart';
 import 'package:alice/ui/widget/alice_base_call_details_widget.dart';
 import 'package:alice/utils/alice_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AliceCallResponseWidget extends StatefulWidget {
   final AliceHttpCall call;
@@ -158,7 +157,7 @@ class _AliceCallResponseWidgetState
         ElevatedButton(
           style: ButtonStyle(
             backgroundColor:
-                MaterialStateProperty.all<Color>(AliceConstants.lightRed),
+                WidgetStateProperty.all<Color>(AliceConstants.lightRed),
           ),
           onPressed: () {
             setState(() {
@@ -206,7 +205,7 @@ class _AliceCallResponseWidgetState
         ElevatedButton(
           style: ButtonStyle(
             backgroundColor:
-                MaterialStateProperty.all<Color>(AliceConstants.lightRed),
+                WidgetStateProperty.all<Color>(AliceConstants.lightRed),
           ),
           onPressed: () {
             setState(() {
