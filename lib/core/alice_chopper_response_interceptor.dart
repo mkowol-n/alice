@@ -7,11 +7,11 @@ import 'package:alice/model/alice_http_request.dart';
 import 'package:alice/model/alice_http_response.dart';
 import 'package:chopper/chopper.dart' as chopper;
 import 'package:http/http.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'alice_core.dart';
 
-class AliceChopperInterceptor extends chopper.ResponseInterceptor
-    with chopper.RequestInterceptor {
+class AliceChopperInterceptor implements chopper.Interceptor {
   /// AliceCore instance
   final AliceCore aliceCore;
 
@@ -36,16 +36,16 @@ class AliceChopperInterceptor extends chopper.ResponseInterceptor
     return hashCodeSum.hashCode;
   }
 
-  /// Handles chopper request and creates alice http call
+  /// Handles chopper response and adds data to existing alice http call
   @override
-  FutureOr<chopper.Request> onRequest(chopper.Request request) async {
+  FutureOr<chopper.Response<BodyType>> intercept<BodyType>(chopper.Chain<BodyType> chain) async {
     try {
-      final baseRequest = await request.toBaseRequest();
+      final baseRequest = await chain.request.toBaseRequest();
       final AliceHttpCall call = AliceHttpCall(getRequestHashCode(baseRequest));
       String endpoint = "";
       String server = "";
 
-      final List<String> split = request.url.toString().split("/");
+      final List<String> split = chain.request.url.toString().split("/");
       if (split.length > 2) {
         server = split[1] + split[2];
       }
@@ -58,32 +58,32 @@ class AliceChopperInterceptor extends chopper.ResponseInterceptor
         endpoint = endpoint.substring(0, endpoint.length - 1);
       }
 
-      call.method = request.method;
+      call.method = chain.request.method;
       call.endpoint = endpoint;
       call.server = server;
       call.client = "Chopper";
-      if (request.url.toString().contains("https")) {
+      if (chain.request.url.toString().contains("https")) {
         call.secure = true;
       }
 
       final AliceHttpRequest aliceHttpRequest = AliceHttpRequest();
 
-      if (request.body == null) {
+      if (chain.request.body == null) {
         aliceHttpRequest.size = 0;
         aliceHttpRequest.body = "";
       } else {
-        aliceHttpRequest.size = utf8.encode(request.body as String).length;
-        aliceHttpRequest.body = request.body;
+        aliceHttpRequest.size = utf8.encode(chain.request.body as String).length;
+        aliceHttpRequest.body = chain.request.body;
       }
       aliceHttpRequest.time = DateTime.now();
-      aliceHttpRequest.headers = request.headers;
+      aliceHttpRequest.headers = chain.request.headers;
 
       String? contentType = "unknown";
-      if (request.headers.containsKey("Content-Type")) {
-        contentType = request.headers["Content-Type"];
+      if (chain.request.headers.containsKey("Content-Type")) {
+        contentType = chain.request.headers["Content-Type"];
       }
       aliceHttpRequest.contentType = contentType;
-      aliceHttpRequest.queryParameters = request.parameters;
+      aliceHttpRequest.queryParameters = chain.request.parameters;
 
       call.request = aliceHttpRequest;
       call.response = AliceHttpResponse();
@@ -92,13 +92,13 @@ class AliceChopperInterceptor extends chopper.ResponseInterceptor
     } catch (exception) {
       AliceUtils.log(exception.toString());
     }
-    return request;
-  }
 
-  /// Handles chopper response and adds data to existing alice http call
-  @override
-  FutureOr<chopper.Response> onResponse(chopper.Response response) {
     final httpResponse = AliceHttpResponse();
+    final String buildNumber = (await PackageInfo.fromPlatform()).buildNumber;
+    final chopper.Response<BodyType> response = await chain.proceed(
+      chopper.applyHeader(chain.request, 'x-app-version', buildNumber),
+    );
+
     httpResponse.status = response.statusCode;
     if (response.body == null) {
       httpResponse.body = "";
